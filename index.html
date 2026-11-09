@@ -1,0 +1,1261 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendario GYC Costa Rica</title>
+<meta name="description" content="Calendario de actividades de GYC Costa Rica">
+<meta name="theme-color" content="#0e1a33">
+<link rel="icon" id="favicon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0e1a33;
+    --panel: #14264a;
+    --panel-2: #1a2f58;
+    --line: rgba(201, 166, 70, .35);
+    --line-soft: rgba(255, 255, 255, .08);
+    --gold: #c9a646;
+    --gold-soft: #e9d9a6;
+    --cream: #f3e6bf;
+    --ink: #e8ecf5;
+    --muted: #9aa6c0;
+    --dim: #6f7c99;
+    --danger: #e07a63;
+    --ok: #3cbcae;
+    --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+    --sans: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.45;
+    min-height: 100vh;
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  [hidden] { display: none !important; }
+
+  /* ---------- Layout ---------- */
+  .wrap {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 20px 16px 120px;
+    display: grid;
+    gap: 20px;
+  }
+  @media (min-width: 1000px) {
+    .wrap { grid-template-columns: 340px 1fr; padding: 40px 32px 120px; gap: 28px; align-items: start; }
+    .side { position: sticky; top: 84px; }
+  }
+
+  /* ---------- Menú de meses ---------- */
+  .monthnav {
+    position: sticky; top: 0; z-index: 15;
+    background: rgba(14, 26, 51, .92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .monthnav ul {
+    list-style: none;
+    margin: 0 auto; padding: 10px 16px;
+    max-width: 1500px;
+    display: flex; gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+  .monthnav ul::-webkit-scrollbar { display: none; }
+  @media (min-width: 1000px) { .monthnav ul { padding: 12px 32px; justify-content: center; } }
+  .monthnav li { flex: none; scroll-snap-align: center; }
+  .monthnav a {
+    position: relative;
+    display: block;
+    font-family: "Cinzel", var(--serif);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 8px 12px 10px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    transition: color .15s, background .15s, border-color .15s;
+  }
+  .monthnav a:hover { color: var(--cream); border-color: var(--line-soft); }
+  .monthnav a.has { color: var(--gold-soft); }
+  .monthnav a .pips {
+    position: absolute; left: 50%; bottom: 3px; transform: translateX(-50%);
+    display: flex; gap: 3px;
+  }
+  .monthnav a .pips i { width: 4px; height: 4px; border-radius: 50%; background: var(--c); }
+  .monthnav a.active { background: var(--gold); color: #13203d; border-color: var(--gold); }
+  .monthnav a.active .pips i { background: #13203d; opacity: .6; }
+  .month { scroll-margin-top: 76px; }
+  .month.flash { animation: flash 1.2s ease; }
+  @keyframes flash { 0%, 40% { box-shadow: 0 0 0 2px var(--gold); } 100% { box-shadow: 0 0 0 2px transparent; } }
+
+  /* ---------- Sidebar ---------- */
+  .brand { text-align: center; padding: 8px 0 4px; }
+  .logo {
+    display: block;
+    width: auto; height: 130px; max-width: 200px;
+    object-fit: contain;
+    margin: 4px auto 6px;
+  }
+  .org {
+    font-family: var(--serif);
+    color: var(--gold);
+    letter-spacing: .32em;
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .year-row { display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .year {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(64px, 14vw, 96px);
+    line-height: 1;
+    color: var(--cream);
+    margin: 4px 0 2px;
+    font-variant-numeric: lining-nums;
+  }
+  .year-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--gold);
+    font-size: 26px;
+    display: grid; place-items: center;
+  }
+  .year-btn:hover { border-color: var(--line); color: var(--gold); }
+  .subtitle {
+    font-family: "Cinzel", var(--serif);
+    font-weight: 500;
+    color: var(--gold-soft);
+    font-size: 14.5px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    margin: 8px 0 0;
+  }
+  .rule { width: 120px; height: 2px; background: var(--gold); opacity: .7; margin: 16px auto 0; border: 0; }
+
+  .legend {
+    margin-top: 22px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px 22px 14px;
+  }
+  .legend-group { margin-bottom: 16px; }
+  .legend-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 4px; }
+  .dot { width: 18px; height: 18px; border-radius: 50%; flex: none; margin-top: 4px; background: var(--c); }
+  .legend-title { font-family: var(--serif); font-weight: 600; font-size: 22px; line-height: 1.15; color: var(--cream); }
+  .legend-items { list-style: none; margin: 0; padding: 0 0 0 30px; }
+  .legend-items li { border-bottom: 1px solid var(--line-soft); display: flex; align-items: center; gap: 6px; }
+  .legend-items li .legend-item { flex: 1; min-width: 0; }
+  .ics-btn {
+    flex: none;
+    display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--line-soft);
+    background: transparent;
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 5px 8px;
+    font-size: 11.5px; font-weight: 600;
+    letter-spacing: .02em;
+  }
+  .ics-btn svg { width: 14px; height: 14px; }
+  .ics-btn:hover, .ics-btn:focus-visible { color: var(--gold); border-color: var(--line); }
+  .day-list .acts { display: flex; flex-direction: column; gap: 6px; flex: none; }
+  .legend-item {
+    display: block; width: 100%;
+    text-align: left;
+    background: none; border: 0;
+    padding: 6px 0;
+    color: var(--ink);
+    font-size: 14.5px;
+  }
+  .legend-item .t { display: block; color: var(--gold-soft); font-weight: 600; font-size: 13.5px; }
+  .legend-item .n { display: block; color: var(--muted); font-size: 12.5px; }
+  .legend-item:hover .d, .legend-item:focus-visible .d { color: var(--gold); }
+  .legend-empty { color: var(--dim); font-size: 13.5px; padding: 4px 0 6px 30px; font-style: italic; }
+  .legend-none { color: var(--muted); text-align: center; padding: 10px 0 14px; }
+
+  .edit-toggle {
+    margin: 14px auto 0;
+    display: flex; align-items: center; gap: 8px;
+    background: none; border: 1px solid var(--line-soft);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-size: 13px;
+  }
+  .edit-toggle:hover { color: var(--gold); border-color: var(--line); }
+
+  /* ---------- Months ---------- */
+  .months {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 560px) { .months { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1000px) { .months { grid-template-columns: repeat(3, 1fr); gap: 18px; } }
+  @media (min-width: 1300px) { .months { grid-template-columns: repeat(4, 1fr); } }
+
+  .month {
+    background: var(--panel);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 14px 12px 12px;
+  }
+  .month.has { border-color: var(--line); }
+  .month h2 {
+    font-family: var(--serif);
+    text-align: center;
+    margin: 0 0 8px;
+    font-size: 25px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    color: var(--ink);
+  }
+  .month.has h2 { color: var(--gold); }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 4px; }
+  .wd { text-align: center; font-size: 11px; font-weight: 700; color: var(--dim); padding: 4px 0 6px; letter-spacing: .05em; }
+  .day {
+    position: relative;
+    aspect-ratio: 1;
+    max-height: 44px;
+    display: grid; place-items: center;
+    background: none; border: 0;
+    padding: 0;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    border-radius: 50%;
+  }
+  .day span {
+    width: min(36px, 92%); aspect-ratio: 1;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    transition: box-shadow .15s, transform .15s;
+  }
+  .day.mark span {
+    background: var(--c);
+    color: var(--fg, #13203d);
+    font-weight: 700;
+    box-shadow: 0 0 0 3px rgba(0,0,0,.18);
+  }
+  .day.mark.multi span { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--c2); }
+  .day.mark.alt span { background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.0) 0 5px, rgba(255,255,255,.22) 5px 7px); }
+  .day.today span { outline: 1.5px dashed var(--gold); outline-offset: 2px; }
+  .day:not(.mark):not(.clickable) { cursor: default; }
+  .day.clickable:hover span, .day.mark:hover span { transform: scale(1.08); }
+  .day.clickable:not(.mark):hover span { background: var(--panel-2); }
+  .day:focus-visible { outline: none; }
+  .day:focus-visible span { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  /* ---------- Edit bar ---------- */
+  .editbar {
+    position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%);
+    z-index: 20;
+    width: calc(100% - 32px); max-width: 980px;
+    background: rgba(20, 38, 74, .96);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 10px;
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,.45);
+  }
+  .status { font-size: 12.5px; color: var(--muted); padding: 0 6px; flex: 1 1 160px; min-width: 0; }
+  .status b { color: var(--gold-soft); font-weight: 600; }
+  .status.dirty b { color: var(--danger); }
+  .btn {
+    border: 1px solid var(--line-soft);
+    background: var(--panel-2);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 13.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--line); }
+  .btn.primary { background: var(--gold); color: #13203d; border-color: var(--gold); }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.ghost { background: transparent; }
+  .btn.danger { background: transparent; color: var(--danger); border-color: rgba(224,122,99,.4); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .edit-hint { text-align: center; color: var(--muted); font-size: 13px; margin: 12px 0 0; }
+
+  /* ---------- Dialogs ---------- */
+  dialog {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    border-radius: 16px;
+    padding: 0;
+    width: min(460px, calc(100% - 32px));
+    max-height: calc(100vh - 48px);
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  }
+  dialog::backdrop { background: rgba(5, 10, 22, .7); }
+  .dlg { padding: 22px; display: grid; gap: 14px; }
+  .dlg h3 { font-family: var(--serif); font-size: 26px; font-weight: 600; color: var(--cream); margin: 0; line-height: 1.15; }
+  .dlg p { margin: 0; color: var(--muted); font-size: 13.5px; }
+  .field { display: grid; gap: 5px; }
+  .field label, .lbl { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  input[type=text], input[type=date], input[type=password], select, textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line-soft);
+    border-radius: 9px;
+    padding: 9px 11px;
+    font-size: 15px;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold); outline-offset: 0; border-color: transparent; }
+  textarea { min-height: 64px; resize: vertical; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--ink); }
+  .check input { margin-top: 3px; accent-color: var(--gold); width: 16px; height: 16px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; padding-top: 4px; }
+  .actions .spacer { flex: 1; }
+  .preview { font-size: 13.5px; color: var(--gold-soft); min-height: 1.2em; }
+
+  .day-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .day-list li { display: flex; gap: 10px; align-items: flex-start; background: var(--bg); border-radius: 10px; padding: 10px 12px; }
+  .day-list .dot { width: 14px; height: 14px; margin-top: 3px; }
+  .day-list .info { flex: 1; min-width: 0; }
+  .day-list .cat { font-weight: 600; color: var(--cream); }
+  .day-list .when { color: var(--muted); font-size: 13px; }
+  .day-list .note { color: var(--ink); font-size: 13px; margin-top: 3px; }
+  .day-list button { flex: none; }
+
+  .cat-rows { display: grid; gap: 8px; max-height: 50vh; overflow: auto; }
+  .cat-row { display: grid; grid-template-columns: 42px 1fr auto; gap: 8px; align-items: center; }
+  .cat-row input[type=color] { width: 42px; height: 40px; padding: 2px; border-radius: 9px; border: 1px solid var(--line-soft); background: var(--bg); }
+  .icon-btn { width: 38px; height: 38px; border-radius: 9px; border: 1px solid var(--line-soft); background: transparent; color: var(--danger); font-size: 18px; }
+  .icon-btn:disabled { color: var(--dim); }
+
+  .toast {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-200%); visibility: hidden;
+    background: var(--panel-2); border: 1px solid var(--line);
+    padding: 10px 16px; border-radius: 10px; z-index: 50;
+    font-size: 14px; max-width: calc(100% - 32px);
+    transition: transform .25s ease, visibility .25s;
+    box-shadow: 0 8px 30px rgba(0,0,0,.4);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); visibility: visible; }
+  .toast.err { border-color: var(--danger); }
+
+  .foot { text-align: center; color: var(--dim); font-size: 12.5px; margin-top: 18px; }
+  .foot a { color: var(--muted); }
+
+  @media print {
+    body { background: #0e1a33; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .monthnav, .editbar, .edit-toggle, .year-btn, .foot, .toast { display: none !important; }
+    .wrap { grid-template-columns: 300px 1fr; padding: 16px; }
+    .months { grid-template-columns: repeat(4, 1fr); }
+    .side { position: static; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="monthnav" aria-label="Meses del año"><ul id="monthNav"></ul></nav>
+
+<div class="wrap">
+  <aside class="side">
+    <div class="brand">
+      <img class="logo" id="logo" alt="Logo de GYC Costa Rica" hidden>
+      <p class="org" id="org">GYC Costa Rica</p>
+      <div class="year-row">
+        <button class="year-btn" id="prevYear" aria-label="Año anterior">‹</button>
+        <div class="year" id="year">2027</div>
+        <button class="year-btn" id="nextYear" aria-label="Año siguiente">›</button>
+      </div>
+      <p class="subtitle" id="subtitle">Calendario de actividades</p>
+      <hr class="rule">
+    </div>
+
+    <div class="legend" id="legend"></div>
+
+    <p class="edit-hint" id="editHint" hidden>Toca un día para añadir una actividad, o una fecha de la lista para editarla.</p>
+    <button class="edit-toggle" id="editToggle">✎ Editar calendario</button>
+    <div class="foot">
+      <a href="#" id="icsLink">Añadir todo el calendario (.ics)</a>
+    </div>
+  </aside>
+
+  <section class="months" id="months" aria-label="Meses"></section>
+</div>
+
+<!-- Barra de edición -->
+<div class="editbar" id="editbar" hidden>
+  <div class="status" id="status"></div>
+  <button class="btn primary" id="btnAdd">+ Actividad</button>
+  <button class="btn" id="btnCats">Categorías</button>
+  <button class="btn" id="btnSettings">Títulos</button>
+  <button class="btn" id="btnExport">Exportar</button>
+  <button class="btn" id="btnImport">Importar</button>
+  <button class="btn primary" id="btnPublish">Publicar en GitHub</button>
+  <button class="btn danger" id="btnDiscard">Descartar</button>
+  <button class="btn ghost" id="btnExit">Salir</button>
+  <input type="file" id="fileImport" accept="application/json,.json" hidden>
+</div>
+
+<!-- Diálogo: actividad -->
+<dialog id="dlgAct">
+  <form class="dlg" method="dialog" id="formAct">
+    <h3 id="actHeading">Nueva actividad</h3>
+    <div class="field">
+      <label for="actCat">Categoría</label>
+      <select id="actCat" required></select>
+    </div>
+    <div class="field">
+      <label for="actTitle">Título <span style="text-transform:none;font-weight:400">(opcional)</span></label>
+      <input type="text" id="actTitle" placeholder="Ej.: Reunión de directiva" maxlength="80">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="actStart">Desde</label>
+        <input type="date" id="actStart" required>
+      </div>
+      <div class="field">
+        <label for="actEnd">Hasta</label>
+        <input type="date" id="actEnd">
+      </div>
+    </div>
+    <label class="check"><input type="checkbox" id="actAlt"> Son fechas alternativas (una <i>o</i> la otra)</label>
+    <div class="field">
+      <label for="actNote">Nota</label>
+      <textarea id="actNote" placeholder="Lugar, hora, responsable…" maxlength="300"></textarea>
+    </div>
+    <div class="preview" id="actPreview"></div>
+    <div class="actions">
+      <button type="button" class="btn danger" id="actDelete">Eliminar</button>
+      <button type="button" class="btn ghost" id="actDuplicate">Duplicar</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost" data-close>Cancelar</button>
+      <button type="submit" class="btn primary">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Diálogo: día -->
+<dialog id="dlgDay">
+  <div class="dlg">
+    <h3 id="dayHeading"></h3>
+    <ul class="day-list" id="dayList"></ul>
+    <div class="actions">
+      <button type="button" class="btn primary" id="dayAdd">+ Añadir aquí</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost" data-close>Cerrar</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Diálogo: categorías -->
+<dialog id="dlgCats">
+  <form class="dlg" method="dialog" id="formCats">
+    <h3>Categorías</h3>
+    <p>El color se usa en el círculo del día y en la leyenda. Solo puedes eliminar una categoría si no tiene actividades.</p>
+    <div class="cat-rows" id="catRows"></div>
+    <div class="actions">
+      <button type="button" class="btn" id="catAdd">+ Categoría</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost" data-close>Cancelar</button>
+      <button type="submit" class="btn primary">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Diálogo: títulos -->
+<dialog id="dlgSettings">
+  <form class="dlg" method="dialog" id="formSettings">
+    <h3>Títulos del calendario</h3>
+    <div class="field"><label for="setOrg">Organización</label><input type="text" id="setOrg" maxlength="60"></div>
+    <div class="field"><label for="setTitle">Subtítulo</label><input type="text" id="setTitle" maxlength="80"></div>
+    <div class="field"><label for="setLogo">Logo (archivo en el repositorio o URL)</label><input type="text" id="setLogo" maxlength="300" placeholder="logo.png"></div>
+    <div class="field"><label for="setYear">Año que se muestra al abrir</label><input type="text" id="setYear" inputmode="numeric" maxlength="4"></div>
+    <div class="actions">
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost" data-close>Cancelar</button>
+      <button type="submit" class="btn primary">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Diálogo: GitHub -->
+<dialog id="dlgGh">
+  <form class="dlg" method="dialog" id="formGh">
+    <h3>Publicar en GitHub</h3>
+    <p>Guarda <code>eventos.json</code> directamente en el repositorio. El token se queda solo en este navegador. GitHub Pages tarda 1–2 minutos en mostrar el cambio.</p>
+    <div class="row2">
+      <div class="field"><label for="ghOwner">Usuario / org.</label><input type="text" id="ghOwner" required autocomplete="off"></div>
+      <div class="field"><label for="ghRepo">Repositorio</label><input type="text" id="ghRepo" required autocomplete="off"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label for="ghBranch">Rama</label><input type="text" id="ghBranch" value="main" required autocomplete="off"></div>
+      <div class="field"><label for="ghPath">Archivo</label><input type="text" id="ghPath" value="eventos.json" required autocomplete="off"></div>
+    </div>
+    <div class="field">
+      <label for="ghToken">Token de acceso</label>
+      <input type="password" id="ghToken" required autocomplete="off" placeholder="github_pat_…">
+    </div>
+    <label class="check"><input type="checkbox" id="ghRemember" checked> Recordar en este dispositivo</label>
+    <div class="actions">
+      <button type="button" class="btn danger" id="ghForget">Olvidar token</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost" data-close>Cancelar</button>
+      <button type="submit" class="btn primary" id="ghSubmit">Publicar</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Datos de respaldo: se usan si no se puede leer eventos.json (por ejemplo, al abrir el archivo directamente) -->
+<script id="datos-iniciales" type="application/json">
+{
+  "organizacion": "GYC Costa Rica",
+  "titulo": "Calendario de actividades",
+  "logo": "logo.png",
+  "anio": 2027,
+  "categorias": [
+    {
+      "id": "libremente",
+      "nombre": "Retiro LibreMente",
+      "color": "#a98bd8"
+    },
+    {
+      "id": "reuniones",
+      "nombre": "Reuniones presenciales",
+      "color": "#3cbcae"
+    },
+    {
+      "id": "posibles",
+      "nombre": "Posibles actividades",
+      "color": "#c9a646"
+    },
+    {
+      "id": "congreso",
+      "nombre": "Congreso",
+      "color": "#e07a63"
+    },
+    {
+      "id": "postcongreso",
+      "nombre": "Postcongreso · fechas por analizar",
+      "color": "#c9a646"
+    }
+  ],
+  "actividades": [
+    {
+      "id": "a1",
+      "categoria": "libremente",
+      "titulo": "",
+      "inicio": "2027-01-30",
+      "fin": "2027-01-31",
+      "alternativa": false,
+      "nota": ""
+    },
+    {
+      "id": "a2",
+      "categoria": "reuniones",
+      "titulo": "",
+      "inicio": "2027-01-24",
+      "fin": "2027-01-24",
+      "alternativa": false,
+      "nota": ""
+    },
+    {
+      "id": "a3",
+      "categoria": "reuniones",
+      "titulo": "",
+      "inicio": "2027-07-24",
+      "fin": "2027-07-24",
+      "alternativa": false,
+      "nota": ""
+    },
+    {
+      "id": "a4",
+      "categoria": "reuniones",
+      "titulo": "",
+      "inicio": "2027-10-23",
+      "fin": "2027-10-24",
+      "alternativa": false,
+      "nota": ""
+    },
+    {
+      "id": "a5",
+      "categoria": "posibles",
+      "titulo": "",
+      "inicio": "2027-03-06",
+      "fin": "2027-03-07",
+      "alternativa": false,
+      "nota": ""
+    },
+    {
+      "id": "a6",
+      "categoria": "posibles",
+      "titulo": "",
+      "inicio": "2027-05-29",
+      "fin": "2027-05-30",
+      "alternativa": true,
+      "nota": ""
+    },
+    {
+      "id": "a7",
+      "categoria": "congreso",
+      "titulo": "",
+      "inicio": "2027-07-30",
+      "fin": "2027-08-02",
+      "alternativa": false,
+      "nota": ""
+    },
+    {
+      "id": "a8",
+      "categoria": "postcongreso",
+      "titulo": "",
+      "inicio": "2027-09-25",
+      "fin": "2027-09-26",
+      "alternativa": false,
+      "nota": ""
+    },
+    {
+      "id": "a9",
+      "categoria": "postcongreso",
+      "titulo": "",
+      "inicio": "2027-11-13",
+      "fin": "2027-11-14",
+      "alternativa": false,
+      "nota": ""
+    },
+    {
+      "id": "a10",
+      "categoria": "postcongreso",
+      "titulo": "",
+      "inicio": "2027-12-11",
+      "fin": "2027-12-12",
+      "alternativa": false,
+      "nota": ""
+    }
+  ]
+}
+</script>
+
+<script>
+(() => {
+  'use strict';
+
+  const LS_DRAFT = 'gyc-calendario:borrador';
+  const LS_GH = 'gyc-calendario:github';
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','setiembre','octubre','noviembre','diciembre'];
+  const ICON_ICS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M12 13v5M9.5 15.5 12 18l2.5-2.5"/></svg>';
+  const DIAS = ['dom','lun','mar','mié','jue','vie','sáb'];
+  const DIAS_LARGO = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const CAB = ['D','L','K','M','J','V','S'];
+
+  const $ = (s) => document.querySelector(s);
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  const store = {
+    get(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} }
+  };
+
+  let publicado = null;   // lo que está en el repositorio
+  let datos = null;       // lo que se está viendo/editando
+  let verAnio = 2027;
+  let editando = false;
+  let actEditId = null;
+  let diaAbierto = null;
+
+  // ---------- Fechas ----------
+  const pad = (n) => String(n).padStart(2, '0');
+  const key = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const parse = (s) => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, (m || 1) - 1, d || 1); };
+  const hoy = key(new Date());
+
+  function rango(a) {
+    let s = parse(a.inicio), e = parse(a.fin || a.inicio);
+    if (e < s) [s, e] = [e, s];
+    return [s, e];
+  }
+  function diasDe(a) {
+    const [s, e] = rango(a);
+    const out = [];
+    const d = new Date(s);
+    while (d <= e && out.length < 400) { out.push(key(d)); d.setDate(d.getDate() + 1); }
+    return out;
+  }
+  function etiqueta(a) {
+    const [s, e] = rango(a);
+    const corto = (d) => `${DIAS[d.getDay()]} ${d.getDate()}`;
+    const anio = (d) => d.getFullYear() !== verAnio ? ` de ${d.getFullYear()}` : '';
+    if (key(s) === key(e)) return `${corto(s)} de ${MESES[s.getMonth()]}${anio(s)}`;
+    const sep = a.alternativa ? ' o ' : ' – ';
+    if (s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear())
+      return `${corto(s)}${sep}${corto(e)} de ${MESES[s.getMonth()]}${anio(s)}`;
+    return `${corto(s)} de ${MESES[s.getMonth()]}${anio(s)}${sep}${corto(e)} de ${MESES[e.getMonth()]}${anio(e)}`;
+  }
+
+  // Texto oscuro o claro según el color de fondo
+  function textoPara(hex) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+    if (!m) return '#13203d';
+    const n = parseInt(m[1], 16);
+    const lin = (c) => { c /= 255; return c <= .03928 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); };
+    const L = .2126 * lin(n >> 16 & 255) + .7152 * lin(n >> 8 & 255) + .0722 * lin(n & 255);
+    return L > .22 ? '#13203d' : '#ffffff';
+  }
+
+  const cat = (id) => datos.categorias.find(c => c.id === id) || { id, nombre: 'Sin categoría', color: '#6f7c99' };
+  const ordenar = (list) => list.slice().sort((a, b) => a.inicio.localeCompare(b.inicio));
+  const nuevoId = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const cambiado = () => JSON.stringify(datos) !== JSON.stringify(publicado);
+
+  // ---------- Carga ----------
+  function normalizar(d) {
+    if (!d || !Array.isArray(d.categorias) || !Array.isArray(d.actividades)) throw new Error('El archivo no tiene "categorias" y "actividades".');
+    return {
+      organizacion: d.organizacion || 'GYC Costa Rica',
+      titulo: d.titulo || 'Calendario de actividades',
+      logo: d.logo ?? 'logo.png',
+      anio: Number(d.anio) || new Date().getFullYear(),
+      categorias: d.categorias.map(c => ({ id: String(c.id), nombre: String(c.nombre || ''), color: c.color || '#c9a646' })),
+      actividades: d.actividades.filter(a => a && a.inicio).map(a => ({
+        id: String(a.id || nuevoId('a')),
+        categoria: String(a.categoria),
+        titulo: a.titulo || '',
+        inicio: a.inicio,
+        fin: a.fin || a.inicio,
+        alternativa: !!a.alternativa,
+        nota: a.nota || ''
+      }))
+    };
+  }
+
+  async function cargar() {
+    const respaldo = JSON.parse($('#datos-iniciales').textContent);
+    try {
+      const r = await fetch('eventos.json?t=' + Date.now(), { cache: 'no-store' });
+      if (r.ok) publicado = normalizar(await r.json());
+    } catch {}
+    if (!publicado) publicado = normalizar(respaldo);
+
+    const borrador = store.get(LS_DRAFT);
+    try { datos = borrador ? normalizar(borrador) : clone(publicado); } catch { datos = clone(publicado); }
+    verAnio = datos.anio;
+
+    const q = new URLSearchParams(location.search);
+    if (q.has('editar') || (borrador && cambiado())) setEditando(true);
+    render();
+  }
+
+  function guardar(msg) {
+    if (cambiado()) store.set(LS_DRAFT, datos); else store.del(LS_DRAFT);
+    render();
+    if (msg) toast(msg);
+  }
+
+  // ---------- Render ----------
+  function render() {
+    $('#org').textContent = datos.organizacion;
+    $('#subtitle').textContent = datos.titulo;
+    $('#year').textContent = verAnio;
+    document.title = `${datos.organizacion} · ${verAnio}`;
+    pintarLogo();
+
+    const indice = {};
+    for (const a of datos.actividades) for (const k of diasDe(a)) (indice[k] ||= []).push(a);
+
+    // Meses
+    let html = '', nav = '';
+    for (let m = 0; m < 12; m++) {
+      const primero = new Date(verAnio, m, 1).getDay();
+      const total = new Date(verAnio, m + 1, 0).getDate();
+      let celdas = CAB.map(c => `<div class="wd" aria-hidden="true">${c}</div>`).join('');
+      for (let i = 0; i < primero; i++) celdas += '<div></div>';
+      let tiene = false;
+      for (let d = 1; d <= total; d++) {
+        const k = `${verAnio}-${pad(m + 1)}-${pad(d)}`;
+        const acts = indice[k] || [];
+        const cls = ['day'];
+        let style = '';
+        let label = `${d} de ${MESES[m]}`;
+        if (acts.length) {
+          tiene = true;
+          const c1 = cat(acts[0].categoria).color;
+          cls.push('mark');
+          style = `--c:${c1};--fg:${textoPara(c1)};`;
+          if (acts.length > 1) {
+            const otra = acts.find(a => cat(a.categoria).color !== c1) || acts[1];
+            cls.push('multi'); style += `--c2:${cat(otra.categoria).color};`;
+          }
+          if (acts.some(a => a.alternativa)) cls.push('alt');
+          label += ': ' + acts.map(a => a.titulo || cat(a.categoria).nombre).join(', ');
+        }
+        if (editando) cls.push('clickable');
+        if (k === hoy) cls.push('today');
+        const interactivo = acts.length || editando;
+        celdas += `<button class="${cls.join(' ')}" style="${style}" data-k="${k}" ${interactivo ? '' : 'tabindex="-1"'} title="${esc(label)}" aria-label="${esc(label)}"><span>${d}</span></button>`;
+      }
+      const nombre = MESES[m][0].toUpperCase() + MESES[m].slice(1);
+      const cols = [...new Set(Object.entries(indice).filter(([k]) => k.startsWith(`${verAnio}-${pad(m + 1)}-`)).flatMap(([, l]) => l.map(a => cat(a.categoria).color)))].slice(0, 4);
+      nav += `<li><a href="#mes-${m + 1}" data-m="${m + 1}" class="${tiene ? 'has' : ''}" aria-label="${nombre}${tiene ? ', con actividades' : ''}">${nombre.slice(0, 3)}${cols.length ? `<span class="pips" aria-hidden="true">${cols.map(c => `<i style="--c:${c}"></i>`).join('')}</span>` : ''}</a></li>`;
+      html += `<article class="month${tiene ? ' has' : ''}" id="mes-${m + 1}"><h2>${nombre}</h2><div class="grid">${celdas}</div></article>`;
+    }
+    $('#months').innerHTML = html;
+    $('#monthNav').innerHTML = nav;
+    observarMeses();
+
+    // Leyenda
+    const delAnio = datos.actividades.filter(a => {
+      const [s, e] = rango(a); return s.getFullYear() <= verAnio && e.getFullYear() >= verAnio;
+    });
+    let leg = '';
+    for (const c of datos.categorias) {
+      const items = ordenar(delAnio.filter(a => a.categoria === c.id));
+      if (!items.length && !editando) continue;
+      leg += `<div class="legend-group"><div class="legend-head"><span class="dot" style="--c:${c.color}"></span><span class="legend-title">${esc(c.nombre)}</span></div>`;
+      if (items.length) {
+        leg += '<ul class="legend-items">' + items.map(a => {
+          const inner = `${a.titulo ? `<span class="t">${esc(a.titulo)}</span>` : ''}<span class="d">${esc(etiqueta(a))}</span>${a.nota ? `<span class="n">${esc(a.nota)}</span>` : ''}`;
+          return `<li><button class="legend-item" data-id="${a.id}">${inner}</button>${botonIcs(a)}</li>`;
+        }).join('') + '</ul>';
+      } else {
+        leg += '<div class="legend-empty">Sin actividades este año</div>';
+      }
+      leg += '</div>';
+    }
+    // Actividades cuya categoría ya no existe
+    const huerfanas = ordenar(delAnio.filter(a => !datos.categorias.some(c => c.id === a.categoria)));
+    if (huerfanas.length) {
+      leg += `<div class="legend-group"><div class="legend-head"><span class="dot" style="--c:#6f7c99"></span><span class="legend-title">Sin categoría</span></div><ul class="legend-items">` +
+        huerfanas.map(a => `<li><button class="legend-item" data-id="${a.id}"><span class="d">${esc(etiqueta(a))}</span></button>${botonIcs(a)}</li>`).join('') + '</ul></div>';
+    }
+    $('#legend').innerHTML = leg || '<div class="legend-none">No hay actividades registradas para este año.</div>';
+
+    // Estado
+    const st = $('#status');
+    if (cambiado()) { st.className = 'status dirty'; st.innerHTML = '<b>Cambios sin publicar</b> · guardados en este navegador'; }
+    else { st.className = 'status'; st.innerHTML = '<b>Al día</b> con la versión publicada'; }
+    $('#btnPublish').disabled = !cambiado();
+    $('#btnDiscard').disabled = !cambiado();
+  }
+
+  // ---------- Menú de meses ----------
+  let mesFijado = null;
+  function marcarMes(n) {
+    document.querySelectorAll('#monthNav a').forEach(a => {
+      const on = a.dataset.m === String(n);
+      a.classList.toggle('active', on);
+      if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+    });
+    const act = document.querySelector('#monthNav a.active');
+    const ul = $('#monthNav');
+    if (act && ul.scrollWidth > ul.clientWidth) ul.scrollTo({ left: act.offsetLeft - ul.clientWidth / 2 + act.offsetWidth / 2, behavior: 'smooth' });
+  }
+  function observarMeses() { calcularMes(); }
+  function calcularMes() {
+    if (mesFijado) return marcarMes(mesFijado);
+    const meses = [...document.querySelectorAll('.month')];
+    if (!meses.length) return;
+    const limite = 140;
+    const pasados = meses.filter(m => m.getBoundingClientRect().top <= limite);
+    let actual = meses[0];
+    if (pasados.length) {
+      const maxTop = Math.max(...pasados.map(m => Math.round(m.getBoundingClientRect().top)));
+      actual = pasados.find(m => Math.round(m.getBoundingClientRect().top) === maxTop);
+    }
+    marcarMes(actual.id.split('-')[1]);
+  }
+  let rafMes = 0;
+  window.addEventListener('scroll', () => { cancelAnimationFrame(rafMes); rafMes = requestAnimationFrame(calcularMes); }, { passive: true });
+  window.addEventListener('resize', () => { cancelAnimationFrame(rafMes); rafMes = requestAnimationFrame(calcularMes); });
+  // Cuando la persona vuelve a desplazarse por su cuenta, el menú sigue de nuevo el scroll
+  ['wheel', 'touchstart', 'keydown'].forEach(ev => window.addEventListener(ev, () => { mesFijado = null; }, { passive: true }));
+  $('#monthNav').addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-m]'); if (!a) return;
+    e.preventDefault();
+    const mes = document.getElementById('mes-' + a.dataset.m);
+    const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    mes.scrollIntoView({ behavior: reducir ? 'auto' : 'smooth', block: 'start' });
+    mes.classList.remove('flash'); void mes.offsetWidth; mes.classList.add('flash');
+    mesFijado = a.dataset.m;
+    marcarMes(a.dataset.m);
+    history.replaceState(null, '', '#mes-' + a.dataset.m);
+  });
+
+  let logoActual = null;
+  function pintarLogo() {
+    const src = (datos.logo || '').trim();
+    if (src === logoActual) return;
+    logoActual = src;
+    const img = $('#logo');
+    img.hidden = true;
+    $('#org').hidden = false;
+    if (!src) return;
+    img.onload = () => { img.hidden = false; $('#org').hidden = true; $('#favicon').href = src; };
+    img.onerror = () => { img.hidden = true; $('#org').hidden = false; };
+    img.alt = 'Logo de ' + datos.organizacion;
+    img.src = src;
+  }
+
+  function setEditando(v) {
+    editando = v;
+    $('#editbar').hidden = !v;
+    $('#editHint').hidden = !v;
+    $('#editToggle').hidden = v;
+    render();
+  }
+
+  // ---------- Toast ----------
+  let toastT;
+  function toast(msg, err) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.toggle('err', !!err);
+    t.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => t.classList.remove('show'), err ? 6000 : 2600);
+  }
+
+  // ---------- Diálogo actividad ----------
+  function abrirActividad(a, fechaInicial) {
+    actEditId = a ? a.id : null;
+    $('#actHeading').textContent = a ? 'Editar actividad' : 'Nueva actividad';
+    $('#actCat').innerHTML = datos.categorias.map(c => `<option value="${esc(c.id)}">${esc(c.nombre)}</option>`).join('');
+    $('#actCat').value = a ? a.categoria : (datos.categorias[0]?.id || '');
+    $('#actTitle').value = a ? a.titulo : '';
+    $('#actStart').value = a ? a.inicio : (fechaInicial || `${verAnio}-01-01`);
+    $('#actEnd').value = a ? a.fin : (fechaInicial || `${verAnio}-01-01`);
+    $('#actAlt').checked = a ? a.alternativa : false;
+    $('#actNote').value = a ? a.nota : '';
+    $('#actDelete').hidden = !a;
+    $('#actDuplicate').hidden = !a;
+    actualizarPreview();
+    $('#dlgAct').showModal();
+  }
+  function leerForm() {
+    let inicio = $('#actStart').value, fin = $('#actEnd').value || inicio;
+    if (fin < inicio) [inicio, fin] = [fin, inicio];
+    return {
+      categoria: $('#actCat').value,
+      titulo: $('#actTitle').value.trim(),
+      inicio, fin,
+      alternativa: $('#actAlt').checked && inicio !== fin,
+      nota: $('#actNote').value.trim()
+    };
+  }
+  function actualizarPreview() {
+    const f = leerForm();
+    $('#actPreview').textContent = f.inicio ? 'Se mostrará: ' + etiqueta(f) : '';
+  }
+  ['actStart', 'actEnd', 'actAlt'].forEach(id => $('#' + id).addEventListener('input', actualizarPreview));
+  $('#actStart').addEventListener('change', () => {
+    if (!$('#actEnd').value || $('#actEnd').value < $('#actStart').value) $('#actEnd').value = $('#actStart').value;
+    actualizarPreview();
+  });
+
+  $('#formAct').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = leerForm();
+    if (!f.inicio) return toast('Indica la fecha de inicio', true);
+    if (!f.categoria) return toast('Primero crea una categoría', true);
+    if (actEditId) Object.assign(datos.actividades.find(a => a.id === actEditId), f);
+    else datos.actividades.push({ id: nuevoId('a'), ...f });
+    const y = parse(f.inicio).getFullYear();
+    if (y !== verAnio) verAnio = y;
+    $('#dlgAct').close();
+    guardar(actEditId ? 'Actividad actualizada' : 'Actividad añadida');
+  });
+  $('#actDelete').addEventListener('click', () => {
+    if (!confirm('¿Eliminar esta actividad?')) return;
+    datos.actividades = datos.actividades.filter(a => a.id !== actEditId);
+    $('#dlgAct').close();
+    guardar('Actividad eliminada');
+  });
+  $('#actDuplicate').addEventListener('click', () => {
+    actEditId = null;
+    $('#actHeading').textContent = 'Nueva actividad (copia)';
+    $('#actDelete').hidden = true;
+    $('#actDuplicate').hidden = true;
+    $('#actStart').focus();
+  });
+
+  // ---------- Diálogo día ----------
+  function abrirDia(k) {
+    const acts = ordenar(datos.actividades.filter(a => diasDe(a).includes(k)));
+    if (!acts.length && editando) return abrirActividad(null, k);
+    if (!acts.length) return;
+    diaAbierto = k;
+    const d = parse(k);
+    $('#dayHeading').textContent = `${DIAS_LARGO[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`.replace(/^./, c => c.toUpperCase());
+    $('#dayList').innerHTML = acts.map(a => {
+      const c = cat(a.categoria);
+      return `<li><span class="dot" style="--c:${c.color}"></span><div class="info">
+        <div class="cat">${esc(a.titulo || c.nombre)}</div>
+        <div class="when">${a.titulo ? esc(c.nombre) + ' · ' : ''}${esc(etiqueta(a))}</div>
+        ${a.nota ? `<div class="note">${esc(a.nota)}</div>` : ''}
+      </div><div class="acts">${botonIcs(a, true)}${editando ? `<button class="btn" data-edit="${a.id}">Editar</button>` : ''}</div></li>`;
+    }).join('');
+    $('#dayAdd').hidden = !editando;
+    $('#dlgDay').showModal();
+  }
+  $('#dayList').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-edit]');
+    if (!b) return;
+    $('#dlgDay').close();
+    abrirActividad(datos.actividades.find(a => a.id === b.dataset.edit));
+  });
+  $('#dayAdd').addEventListener('click', () => { $('#dlgDay').close(); abrirActividad(null, diaAbierto); });
+
+  // ---------- Categorías ----------
+  let catsTmp = [];
+  function pintarCats() {
+    const usadas = new Set(datos.actividades.map(a => a.categoria));
+    $('#catRows').innerHTML = catsTmp.map((c, i) => `
+      <div class="cat-row">
+        <input type="color" value="${esc(c.color)}" data-i="${i}" data-f="color" aria-label="Color">
+        <input type="text" value="${esc(c.nombre)}" data-i="${i}" data-f="nombre" placeholder="Nombre de la categoría" aria-label="Nombre">
+        <button type="button" class="icon-btn" data-del="${i}" ${usadas.has(c.id) ? 'disabled title="Tiene actividades"' : 'title="Eliminar"'} aria-label="Eliminar">×</button>
+      </div>`).join('');
+  }
+  $('#catRows').addEventListener('input', (e) => {
+    const t = e.target; if (t.dataset.i == null) return;
+    catsTmp[+t.dataset.i][t.dataset.f] = t.value;
+  });
+  $('#catRows').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-del]'); if (!b || b.disabled) return;
+    catsTmp.splice(+b.dataset.del, 1); pintarCats();
+  });
+  $('#catAdd').addEventListener('click', () => {
+    catsTmp.push({ id: nuevoId('c'), nombre: '', color: '#3cbcae' });
+    pintarCats();
+    const inputs = $('#catRows').querySelectorAll('input[type=text]');
+    inputs[inputs.length - 1].focus();
+  });
+  $('#formCats').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (catsTmp.some(c => !c.nombre.trim())) return toast('Cada categoría necesita un nombre', true);
+    datos.categorias = catsTmp.map(c => ({ ...c, nombre: c.nombre.trim() }));
+    $('#dlgCats').close();
+    guardar('Categorías guardadas');
+  });
+
+  // ---------- Títulos ----------
+  $('#formSettings').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const y = parseInt($('#setYear').value, 10);
+    if (!(y > 1999 && y < 2200)) return toast('Escribe un año válido', true);
+    datos.organizacion = $('#setOrg').value.trim() || datos.organizacion;
+    datos.titulo = $('#setTitle').value.trim() || datos.titulo;
+    datos.logo = $('#setLogo').value.trim();
+    datos.anio = y; verAnio = y;
+    $('#dlgSettings').close();
+    guardar('Títulos guardados');
+  });
+
+  // ---------- Exportar / importar / ICS ----------
+  function descargar(nombre, texto, tipo) {
+    const url = URL.createObjectURL(new Blob([texto], { type: tipo }));
+    const a = Object.assign(document.createElement('a'), { href: url, download: nombre });
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  const jsonTexto = () => JSON.stringify(datos, null, 2) + '\n';
+
+  $('#btnExport').addEventListener('click', () => descargar('eventos.json', jsonTexto(), 'application/json'));
+  $('#btnImport').addEventListener('click', () => $('#fileImport').click());
+  $('#fileImport').addEventListener('change', async (e) => {
+    const f = e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    try {
+      datos = normalizar(JSON.parse(await f.text()));
+      verAnio = datos.anio;
+      guardar('Calendario importado');
+    } catch (err) { toast('No se pudo importar: ' + err.message, true); }
+  });
+
+  function generarIcs(lista, nombreCal) {
+    const f = (x) => x.replace(/-/g, '');
+    const sig = (x) => { const d = parse(x); d.setDate(d.getDate() + 1); return f(key(d)); };
+    const icsEsc = (x) => String(x).replace(/[\;,]/g, m => '\\' + m).replace(/\n/g, '\\n');
+    const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+    const lineas = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//GYC Costa Rica//Calendario//ES', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', `X-WR-CALNAME:${icsEsc(nombreCal)}`];
+    for (const a of ordenar(lista)) {
+      const c = cat(a.categoria);
+      const nombre = (a.titulo || c.nombre) + (a.alternativa ? ' (fecha por definir)' : '');
+      const desc = [a.titulo ? c.nombre : '', a.alternativa ? 'Opciones: ' + etiqueta(a) : '', a.nota].filter(Boolean).join('\n');
+      lineas.push('BEGIN:VEVENT', `UID:${a.id}@gyc-costa-rica`, `DTSTAMP:${stamp}`,
+        `DTSTART;VALUE=DATE:${f(a.inicio)}`, `DTEND;VALUE=DATE:${sig(a.fin || a.inicio)}`,
+        `SUMMARY:${icsEsc(datos.organizacion + ' · ' + nombre)}`, 'TRANSP:TRANSPARENT');
+      if (desc) lineas.push(`DESCRIPTION:${icsEsc(desc)}`);
+      lineas.push('END:VEVENT');
+    }
+    lineas.push('END:VCALENDAR');
+    return lineas.join('\r\n') + '\r\n';
+  }
+  const slug = (x) => String(x).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+  function botonIcs(a, conTexto) {
+    const nombre = a.titulo || cat(a.categoria).nombre;
+    return `<button type="button" class="ics-btn" data-ics="${a.id}" title="Descargar .ics: ${esc(nombre)}, ${esc(etiqueta(a))}" aria-label="Añadir a mi calendario: ${esc(nombre)}, ${esc(etiqueta(a))}">${ICON_ICS}${conTexto ? 'Añadir a mi calendario' : '.ics'}</button>`;
+  }
+  function descargarIcsDe(id) {
+    const a = datos.actividades.find(x => x.id === id); if (!a) return;
+    const nombre = a.titulo || cat(a.categoria).nombre;
+    descargar(`gyc-${slug(nombre)}-${a.inicio}.ics`, generarIcs([a], datos.organizacion), 'text/calendar');
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-ics]'); if (!b) return;
+    e.stopPropagation();
+    descargarIcsDe(b.dataset.ics);
+  });
+  $('#icsLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    descargar('calendario-gyc.ics', generarIcs(datos.actividades, datos.organizacion), 'text/calendar');
+  });
+
+  // ---------- GitHub ----------
+  function ghConfig() {
+    const g = store.get(LS_GH) || {};
+    // Deducir usuario/repositorio cuando la página está en GitHub Pages
+    const host = location.hostname;
+    if (!g.owner && host.endsWith('.github.io')) g.owner = host.split('.')[0];
+    if (!g.repo && host.endsWith('.github.io')) g.repo = location.pathname.split('/').filter(Boolean)[0] || `${g.owner}.github.io`;
+    return { branch: 'main', path: 'eventos.json', ...g };
+  }
+  function b64(texto) {
+    const bytes = new TextEncoder().encode(texto);
+    let bin = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(bin);
+  }
+  async function publicar(cfg) {
+    const api = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${cfg.path.split('/').map(encodeURIComponent).join('/')}`;
+    const headers = { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
+    let sha;
+    const g = await fetch(`${api}?ref=${encodeURIComponent(cfg.branch)}`, { headers, cache: 'no-store' });
+    if (g.ok) sha = (await g.json()).sha;
+    else if (g.status !== 404) throw new Error(mensajeGh(g.status));
+    const fecha = new Date().toLocaleString('es-CR');
+    const p = await fetch(api, {
+      method: 'PUT', headers,
+      body: JSON.stringify({ message: `Actualizar calendario (${fecha})`, content: b64(jsonTexto()), branch: cfg.branch, ...(sha ? { sha } : {}) })
+    });
+    if (!p.ok) {
+      let detalle = ''; try { detalle = (await p.json()).message; } catch {}
+      throw new Error(mensajeGh(p.status, detalle));
+    }
+  }
+  function mensajeGh(status, detalle) {
+    if (status === 401) return 'El token no es válido o expiró.';
+    if (status === 403) return 'El token no tiene permiso de escritura en este repositorio.';
+    if (status === 404) return 'No se encontró el repositorio o la rama. Revisa los datos.';
+    if (status === 409) return 'Alguien publicó al mismo tiempo. Intenta de nuevo.';
+    if (status === 422) return 'GitHub rechazó el archivo' + (detalle ? ': ' + detalle : '.');
+    return `Error de GitHub (${status})${detalle ? ': ' + detalle : ''}`;
+  }
+
+  $('#btnPublish').addEventListener('click', () => {
+    const c = ghConfig();
+    $('#ghOwner').value = c.owner || '';
+    $('#ghRepo').value = c.repo || '';
+    $('#ghBranch').value = c.branch;
+    $('#ghPath').value = c.path;
+    $('#ghToken').value = c.token || '';
+    $('#ghRemember').checked = c.token ? true : $('#ghRemember').checked;
+    $('#dlgGh').showModal();
+  });
+  $('#formGh').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const cfg = {
+      owner: $('#ghOwner').value.trim(), repo: $('#ghRepo').value.trim(),
+      branch: $('#ghBranch').value.trim() || 'main', path: $('#ghPath').value.trim().replace(/^\/+/, '') || 'eventos.json',
+      token: $('#ghToken').value.trim()
+    };
+    const recordar = $('#ghRemember').checked;
+    store.set(LS_GH, recordar ? cfg : { ...cfg, token: undefined });
+    const btn = $('#ghSubmit');
+    btn.disabled = true; btn.textContent = 'Publicando…';
+    try {
+      await publicar(cfg);
+      publicado = clone(datos);
+      store.del(LS_DRAFT);
+      $('#dlgGh').close();
+      render();
+      toast('¡Publicado! La página se actualizará en 1–2 minutos.');
+    } catch (err) {
+      toast(err.message || 'No se pudo publicar', true);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Publicar';
+    }
+  });
+  $('#ghForget').addEventListener('click', () => {
+    const c = store.get(LS_GH) || {};
+    delete c.token; store.set(LS_GH, c);
+    $('#ghToken').value = '';
+    toast('Token eliminado de este navegador');
+  });
+
+  // ---------- Eventos generales ----------
+  $('#months').addEventListener('click', (e) => {
+    const b = e.target.closest('.day'); if (b) abrirDia(b.dataset.k);
+  });
+  $('#legend').addEventListener('click', (e) => {
+    const b = e.target.closest('.legend-item'); if (!b) return;
+    const a = datos.actividades.find(x => x.id === b.dataset.id);
+    if (editando) abrirActividad(a);
+    else abrirDia(a.inicio);
+  });
+  $('#prevYear').addEventListener('click', () => { verAnio--; render(); });
+  $('#nextYear').addEventListener('click', () => { verAnio++; render(); });
+  $('#editToggle').addEventListener('click', () => setEditando(true));
+  $('#btnExit').addEventListener('click', () => {
+    setEditando(false);
+    if (cambiado()) toast('Tus cambios siguen guardados en este navegador, pero aún no están publicados.');
+  });
+  $('#btnAdd').addEventListener('click', () => {
+    const k = key(new Date());
+    abrirActividad(null, k.startsWith(String(verAnio)) ? k : `${verAnio}-01-01`);
+  });
+  $('#btnCats').addEventListener('click', () => { catsTmp = clone(datos.categorias); pintarCats(); $('#dlgCats').showModal(); });
+  $('#btnSettings').addEventListener('click', () => {
+    $('#setOrg').value = datos.organizacion; $('#setLogo').value = datos.logo || ''; $('#setTitle').value = datos.titulo; $('#setYear').value = datos.anio;
+    $('#dlgSettings').showModal();
+  });
+  $('#btnDiscard').addEventListener('click', () => {
+    if (!confirm('¿Descartar los cambios no publicados y volver a la versión publicada?')) return;
+    datos = clone(publicado); verAnio = datos.anio;
+    store.del(LS_DRAFT);
+    render(); toast('Cambios descartados');
+  });
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-close]'); if (b) b.closest('dialog').close();
+  });
+  // Cerrar diálogos al tocar fuera
+  document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', (e) => { if (e.target === d) d.close(); }));
+
+  cargar();
+})();
+</script>
+</body>
+</html>
